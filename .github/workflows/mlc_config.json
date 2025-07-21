@@ -1,0 +1,24 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^https://github.com/yourusername/"
+    }
+  ],
+  "replacementPatterns": [
+    {
+      "pattern": "^/",
+      "replacement": "{{BASEURL}}/"
+    }
+  ],
+  "httpStatusCodes": [
+    {
+      "urls": [],
+      "statusCodes": [200, 301, 302]
+    }
+  ],
+  "timeout": "20s",
+  "retryOn429": true,
+  "retryCount": 5,
+  "fallbackRetryDelay": "30s",
+  "aliveStatusCodes": [200, 206]
+}

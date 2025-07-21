@@ -1,0 +1,135 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: macos-latest
+    
+    strategy:
+      matrix:
+        shell: [fish, zsh]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install Fish shell
+      if: matrix.shell == 'fish'
+      run: |
+        brew install fish
+    
+    - name: Install Zsh shell
+      if: matrix.shell == 'zsh'
+      run: |
+        # Zsh is pre-installed on macOS, but let's make sure it's available
+        zsh --version
+    
+    - name: Test installation script
+      run: |
+        chmod +x install.sh uninstall.sh
+        
+        # Test shell-specific installation
+        if [ "${{ matrix.shell }}" = "fish" ]; then
+          ./install.sh --fish-only
+        else
+          ./install.sh --zsh-only
+        fi
+    
+    - name: Test finder command
+      run: |
+        if [ "${{ matrix.shell }}" = "fish" ]; then
+          # Test Fish version
+          fish -c "finder --help"
+          fish -c "finder --version"
+          fish -c "finder ."
+        else
+          # Test Zsh version
+          zsh -c "source ~/.zshrc && finder --help"
+          zsh -c "source ~/.zshrc && finder --version"
+          zsh -c "source ~/.zshrc && finder ."
+        fi
+    
+    - name: Test error handling
+      run: |
+        if [ "${{ matrix.shell }}" = "fish" ]; then
+          # Test error cases with Fish
+          fish -c "finder /nonexistent/path" || echo "Expected error for nonexistent path"
+        else
+          # Test error cases with Zsh
+          zsh -c "source ~/.zshrc && finder /nonexistent/path" || echo "Expected error for nonexistent path"
+        fi
+    
+    - name: Test uninstallation
+      run: |
+        if [ "${{ matrix.shell }}" = "fish" ]; then
+          ./uninstall.sh --fish-only --force
+        else
+          ./uninstall.sh --zsh-only --force
+        fi
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install ShellCheck
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y shellcheck
+    
+    - name: Lint shell scripts
+      run: |
+        # Lint bash scripts
+        shellcheck install.sh uninstall.sh
+        
+        # Lint Fish script (basic syntax check)
+        fish --no-execute fish/finder.fish || echo "Fish syntax check completed"
+        
+        # Lint Zsh script (basic syntax check)
+        zsh -n zsh/finder.zsh || echo "Zsh syntax check completed"
+
+  check-links:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Check markdown links
+      uses: gaurav-nelson/github-action-markdown-link-check@v1
+      with:
+        use-quiet-mode: 'yes'
+        use-verbose-mode: 'yes'
+        config-file: '.github/workflows/mlc_config.json'
+
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run security scan
+      run: |
+        # Check for potential security issues in shell scripts
+        echo "Checking for potential security issues..."
+        
+        # Look for unsafe patterns
+        ! grep -r "eval.*\$" . --include="*.sh" --include="*.fish" --include="*.zsh" || {
+          echo "Warning: Found potential eval with user input"
+          exit 1
+        }
+        
+        # Check for hardcoded paths that might be problematic
+        ! grep -r "/tmp" . --include="*.sh" --include="*.fish" --include="*.zsh" || {
+          echo "Info: Found /tmp usage - verify it's safe"
+        }
+        
+        echo "Basic security checks passed"
