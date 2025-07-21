@@ -1,6 +1,6 @@
 # Finder Shell Extension
 
-A simple, elegant shell extension that adds a `finder` command to open Finder windows on macOS. Supports both Fish shell and Zsh with comprehensive error handling and user-friendly features.
+A simple, elegant shell extension that adds a `finder` command to open Finder windows on macOS. Supports both Fish shell and Zsh.
 
 ## ✨ Features
 
@@ -17,14 +17,14 @@ A simple, elegant shell extension that adds a `finder` command to open Finder wi
 
 ### Installation
 
-#### Fish Shell (Recommended: Fisher)
+#### Fish Shell (Fisher)
 
 ```bash
-# Install using Fisher (recommended)
+# Install using Fisher
 fisher install iamrajjoshi/finder
 ```
 
-#### Zsh Shell (Recommended: Oh My Zsh)
+#### Zsh Shell (Oh My Zsh)
 
 ```bash
 # Clone to Oh My Zsh custom plugins directory
@@ -35,23 +35,6 @@ plugins=(... finder)
 
 # Reload your shell
 source ~/.zshrc
-```
-
-#### Alternative Installation Methods
-
-```bash
-# Clone the repository
-git clone https://github.com/iamrajjoshi/finder.git
-cd finder
-
-# Auto-detect and install appropriately
-./install.sh
-
-# Manual installation options
-./install.sh --fish-fisher      # Fish with Fisher
-./install.sh --fish-manual      # Fish manual installation
-./install.sh --zsh-ohmyzsh      # Zsh with Oh My Zsh
-./install.sh --zsh-manual       # Zsh manual installation
 ```
 
 ### Basic Usage
@@ -79,6 +62,7 @@ finder --help
 ## 📖 Usage Examples
 
 ### Opening Directories
+
 ```bash
 # Current directory
 finder
@@ -97,6 +81,7 @@ finder ./subfolder
 ```
 
 ### Revealing Files
+
 ```bash
 # Reveal any file type in Finder
 finder ~/Documents/report.pdf
@@ -105,6 +90,7 @@ finder ./README.md
 ```
 
 ### Advanced Usage
+
 ```bash
 # Multiple mixed paths
 finder ~/Desktop file.txt ../parent-dir
@@ -125,16 +111,19 @@ finder "~/My Documents/Project Files"
 Fisher is the recommended package manager for Fish shell:
 
 1. **Install Fisher** (if not already installed):
+
    ```bash
    curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
    ```
 
 2. **Install Finder**:
+
    ```bash
    fisher install iamrajjoshi/finder
    ```
 
 3. **Uninstall** (if needed):
+
    ```bash
    fisher remove iamrajjoshi/finder
    ```
@@ -144,66 +133,53 @@ Fisher is the recommended package manager for Fish shell:
 Oh My Zsh is the recommended framework for Zsh:
 
 1. **Install Oh My Zsh** (if not already installed):
+
    ```bash
    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
    ```
 
 2. **Install Finder as a custom plugin**:
+
    ```bash
    git clone https://github.com/iamrajjoshi/finder.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/finder
    ```
 
 3. **Add to plugins** in `~/.zshrc`:
+
    ```bash
    plugins=(git ... finder)
    ```
 
 4. **Reload your shell**:
+
    ```bash
    source ~/.zshrc
    ```
 
-### Alternative Installation Methods
+### Manual Installation
 
-If you prefer not to use package managers, you can use the installation script:
-
-```bash
-git clone https://github.com/iamrajjoshi/finder.git
-cd finder
-./install.sh
-```
-
-#### Installation Script Options
-
-| Option | Description |
-|--------|-------------|
-| `--auto` | Auto-detect shells and package managers (default) |
-| `--fish-fisher` | Install for Fish using Fisher |
-| `--fish-manual` | Install for Fish manually |
-| `--zsh-ohmyzsh` | Install for Zsh using Oh My Zsh |
-| `--zsh-manual` | Install for Zsh manually |
-| `--help` | Show installation help |
-
-#### Manual Installation
+If you prefer not to use package managers:
 
 **Fish Shell:**
 ```bash
-# Copy function and completion files
+# Clone and copy files manually
+git clone https://github.com/iamrajjoshi/finder.git
 mkdir -p ~/.config/fish/{functions,completions}
-cp functions/finder.fish ~/.config/fish/functions/
-cp completions/finder.fish ~/.config/fish/completions/
+cp finder/functions/finder.fish ~/.config/fish/functions/
+cp finder/completions/finder.fish ~/.config/fish/completions/
 ```
 
 **Zsh Shell:**
 ```bash
-# Add to your .zshrc
+# Clone and source manually
+git clone https://github.com/iamrajjoshi/finder.git
 echo 'source /path/to/finder/plugins/finder/finder.plugin.zsh' >> ~/.zshrc
 source ~/.zshrc
 ```
 
 ## 🗑️ Uninstallation
 
-### Using Package Managers (Recommended)
+### Using Package Managers
 
 #### Fisher (Fish)
 ```bash
@@ -219,27 +195,20 @@ rm -rf ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/finder
 # Then reload: source ~/.zshrc
 ```
 
-### Using Uninstall Script
+### Manual Uninstallation
 
+#### Fish Shell
 ```bash
-# Remove all detected installations
-./uninstall.sh
-
-# Remove specific installation method
-./uninstall.sh --fish-manual    # Fish manual installation
-./uninstall.sh --zsh-ohmyzsh    # Oh My Zsh plugin
-./uninstall.sh --zsh-manual     # Zsh manual installation
-
-# Force removal without confirmation
-./uninstall.sh --force
+# Remove function and completion files
+rm ~/.config/fish/functions/finder.fish
+rm ~/.config/fish/completions/finder.fish
 ```
 
-The uninstaller will:
-- Detect current installation methods
-- Remove shell functions and configurations
-- Create backups before modifying files
-- Clean up empty directories (with confirmation)
-- Provide detailed feedback
+#### Zsh Shell
+```bash
+# Remove source line from ~/.zshrc and reload
+# Then remove the cloned repository
+```
 
 ## 🛠️ Requirements
 

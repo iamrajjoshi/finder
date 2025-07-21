@@ -29,15 +29,15 @@ jobs:
         # Zsh is pre-installed on macOS, but let's make sure it's available
         zsh --version
     
-    - name: Test installation script
-      run: |
-        chmod +x install.sh uninstall.sh
-        
-        # Test shell-specific installation
+    - name: Test manual installation
+      run: |        
+        # Test shell-specific manual installation
         if [ "${{ matrix.shell }}" = "fish" ]; then
-          ./install.sh --fish-only
+          mkdir -p ~/.config/fish/{functions,completions}
+          cp functions/finder.fish ~/.config/fish/functions/
+          cp completions/finder.fish ~/.config/fish/completions/
         else
-          ./install.sh --zsh-only
+          echo 'source "'$(pwd)'/plugins/finder/finder.plugin.zsh"' >> ~/.zshrc
         fi
     
     - name: Test finder command
@@ -67,9 +67,11 @@ jobs:
     - name: Test uninstallation
       run: |
         if [ "${{ matrix.shell }}" = "fish" ]; then
-          ./uninstall.sh --fish-only --force
+          rm ~/.config/fish/functions/finder.fish
+          rm ~/.config/fish/completions/finder.fish
         else
-          ./uninstall.sh --zsh-only --force
+          # Remove source line from .zshrc
+          sed -i '' '/finder.plugin.zsh/d' ~/.zshrc
         fi
 
   lint:
@@ -85,15 +87,12 @@ jobs:
         sudo apt-get install -y shellcheck
     
     - name: Lint shell scripts
-      run: |
-        # Lint bash scripts
-        shellcheck install.sh uninstall.sh
-        
+      run: |        
         # Lint Fish script (basic syntax check)
-        fish --no-execute fish/finder.fish || echo "Fish syntax check completed"
+        fish --no-execute functions/finder.fish || echo "Fish syntax check completed"
         
         # Lint Zsh script (basic syntax check)
-        zsh -n zsh/finder.zsh || echo "Zsh syntax check completed"
+        zsh -n plugins/finder/finder.plugin.zsh || echo "Zsh syntax check completed"
 
   check-links:
     runs-on: ubuntu-latest
@@ -122,13 +121,13 @@ jobs:
         echo "Checking for potential security issues..."
         
         # Look for unsafe patterns
-        ! grep -r "eval.*\$" . --include="*.sh" --include="*.fish" --include="*.zsh" || {
+        ! grep -r "eval.*\$" . --include="*.fish" --include="*.zsh" || {
           echo "Warning: Found potential eval with user input"
           exit 1
         }
         
         # Check for hardcoded paths that might be problematic
-        ! grep -r "/tmp" . --include="*.sh" --include="*.fish" --include="*.zsh" || {
+        ! grep -r "/tmp" . --include="*.fish" --include="*.zsh" || {
           echo "Info: Found /tmp usage - verify it's safe"
         }
         

@@ -48,9 +48,12 @@ This project adheres to a code of conduct that we expect all contributors to fol
 
 ## 🛠️ Development Setup
 
-1. **Test the current installation**:
+1. **Test the current functionality**:
    ```bash
-   ./install.sh --auto
+   # Install manually for testing
+   mkdir -p ~/.config/fish/{functions,completions}
+   cp functions/finder.fish ~/.config/fish/functions/
+   cp completions/finder.fish ~/.config/fish/completions/
    finder --help
    ```
 
@@ -58,16 +61,13 @@ This project adheres to a code of conduct that we expect all contributors to fol
    - `functions/finder.fish` - Fish shell function
    - `completions/finder.fish` - Fish shell completions
    - `plugins/finder/finder.plugin.zsh` - Zsh implementation
-   - `install.sh` - Installation script
-   - `uninstall.sh` - Uninstallation script
 
 3. **Test your changes**:
    ```bash
-   # Uninstall current version
-   ./uninstall.sh --force
-   
-   # Install your modified version
-   ./install.sh --auto
+   # Install your modified version manually for testing
+   mkdir -p ~/.config/fish/{functions,completions}
+   cp functions/finder.fish ~/.config/fish/functions/
+   cp completions/finder.fish ~/.config/fish/completions/
    
    # Test functionality
    finder .
@@ -243,11 +243,9 @@ install_fish() {
 ```
 finder/
 ├── functions/finder.fish          # Fish function (Fisher-compatible)
-├── completions/finder.fish        # Fish completions (Fisher-compatible)
+├── completions/finder.fish        # Fish completions (Fisher-compatible)  
 ├── plugins/finder/                # Oh My Zsh plugin structure
 │   └── finder.plugin.zsh         # Zsh implementation
-├── install.sh                     # Installation script
-├── uninstall.sh                   # Uninstallation script
 ├── README.md                      # Main documentation
 ├── CONTRIBUTING.md                # This file
 ├── LICENSE                        # MIT license
@@ -277,11 +275,11 @@ Before submitting a pull request, test the following scenarios:
 - [ ] `finder /usr/bin/ls` - reveals system files
 
 #### Installation/Uninstallation
-- [ ] `./install.sh --fish-only` - Fish installation works
-- [ ] `./install.sh --zsh-only` - Zsh installation works
-- [ ] `./install.sh --auto` - Auto-detection works
-- [ ] `./uninstall.sh --force` - Uninstallation works
-- [ ] Reinstallation after uninstallation works
+- [ ] Fisher installation: `fisher install iamrajjoshi/finder`
+- [ ] Oh My Zsh plugin installation
+- [ ] Manual installation for both shells
+- [ ] Fisher removal: `fisher remove iamrajjoshi/finder`
+- [ ] Manual uninstallation works
 
 #### Shell-Specific Testing
 
