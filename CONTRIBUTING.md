@@ -55,8 +55,9 @@ This project adheres to a code of conduct that we expect all contributors to fol
    ```
 
 2. **Make your changes** to the appropriate files:
-   - `fish/finder.fish` - Fish shell implementation
-   - `zsh/finder.zsh` - Zsh implementation
+   - `functions/finder.fish` - Fish shell function
+   - `completions/finder.fish` - Fish shell completions
+   - `plugins/finder/finder.plugin.zsh` - Zsh implementation
    - `install.sh` - Installation script
    - `uninstall.sh` - Uninstallation script
 
@@ -241,14 +242,16 @@ install_fish() {
 
 ```
 finder/
-├── fish/finder.fish          # Fish implementation
-├── zsh/finder.zsh            # Zsh implementation
-├── install.sh                # Installation script
-├── uninstall.sh              # Uninstallation script
-├── README.md                 # Main documentation
-├── CONTRIBUTING.md           # This file
-├── LICENSE                   # MIT license
-└── .github/                  # GitHub templates
+├── functions/finder.fish          # Fish function (Fisher-compatible)
+├── completions/finder.fish        # Fish completions (Fisher-compatible)
+├── plugins/finder/                # Oh My Zsh plugin structure
+│   └── finder.plugin.zsh         # Zsh implementation
+├── install.sh                     # Installation script
+├── uninstall.sh                   # Uninstallation script
+├── README.md                      # Main documentation
+├── CONTRIBUTING.md                # This file
+├── LICENSE                        # MIT license
+└── .github/                       # GitHub templates
     ├── ISSUE_TEMPLATE/
     └── workflows/
 ```

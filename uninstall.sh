@@ -48,66 +48,128 @@ confirm_action() {
 
 # Check what's currently installed
 check_installation() {
-    local fish_installed=false
-    local zsh_installed=false
+    local installations=()
     
-    # Check Fish installation
+    # Check Fish manual installation
     local fish_functions_dir="$HOME/.config/fish/functions"
-    if [[ -f "$fish_functions_dir/finder.fish" ]]; then
-        fish_installed=true
+    local fish_completions_dir="$HOME/.config/fish/completions"
+    if [[ -f "$fish_functions_dir/finder.fish" ]] || [[ -f "$fish_completions_dir/finder.fish" ]]; then
+        installations+=("fish-manual")
     fi
     
-    # Check Zsh installation
+    # Check Zsh Oh My Zsh installation
+    local zsh_custom="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+    local plugin_dir="$zsh_custom/plugins/finder"
+    if [[ -f "$plugin_dir/finder.plugin.zsh" ]]; then
+        installations+=("zsh-ohmyzsh")
+    fi
+    
+    # Check Zsh manual installation
     local zsh_config_file="$HOME/.zshrc"
-    if [[ -f "$zsh_config_file" ]] && grep -q "finder.zsh" "$zsh_config_file" 2>/dev/null; then
-        zsh_installed=true
+    if [[ -f "$zsh_config_file" ]] && grep -q "finder.plugin.zsh" "$zsh_config_file" 2>/dev/null; then
+        installations+=("zsh-manual")
     fi
     
-    echo "$fish_installed $zsh_installed"
+    echo "${installations[@]}"
 }
 
-# Uninstall from Fish shell
-uninstall_fish() {
-    print_status "Uninstalling finder command from Fish shell..."
+# Uninstall Fish manual installation
+uninstall_fish_manual() {
+    print_status "Uninstalling finder command from Fish shell (manual installation)..."
     
     local fish_functions_dir="$HOME/.config/fish/functions"
+    local fish_completions_dir="$HOME/.config/fish/completions"
     local fish_function_file="$fish_functions_dir/finder.fish"
+    local fish_completion_file="$fish_completions_dir/finder.fish"
+    local removed_count=0
     
-    if [[ ! -f "$fish_function_file" ]]; then
-        print_warning "Fish function not found at: $fish_function_file"
+    # Remove function file
+    if [[ -f "$fish_function_file" ]]; then
+        if rm "$fish_function_file"; then
+            print_success "Removed Fish function: $fish_function_file"
+            removed_count=$((removed_count + 1))
+        else
+            print_error "Failed to remove Fish function: $fish_function_file"
+            return 1
+        fi
+    fi
+    
+    # Remove completion file
+    if [[ -f "$fish_completion_file" ]]; then
+        if rm "$fish_completion_file"; then
+            print_success "Removed Fish completion: $fish_completion_file"
+            removed_count=$((removed_count + 1))
+        else
+            print_error "Failed to remove Fish completion: $fish_completion_file"
+            return 1
+        fi
+    fi
+    
+    if [[ $removed_count -eq 0 ]]; then
+        print_warning "No Fish installation files found"
         return 0
     fi
     
-    if rm "$fish_function_file"; then
-        print_success "Removed Fish function: $fish_function_file"
-        
-        # Clean up empty directories if they exist and are empty
-        if [[ -d "$fish_functions_dir" ]] && [[ -z "$(ls -A "$fish_functions_dir")" ]]; then
-            if confirm_action "Remove empty Fish functions directory ($fish_functions_dir)?"; then
-                rmdir "$fish_functions_dir"
-                print_success "Removed empty directory: $fish_functions_dir"
-                
-                # Check if parent config directory is empty
-                local fish_config_dir="$HOME/.config/fish"
-                if [[ -d "$fish_config_dir" ]] && [[ -z "$(ls -A "$fish_config_dir")" ]]; then
-                    if confirm_action "Remove empty Fish config directory ($fish_config_dir)?"; then
-                        rmdir "$fish_config_dir"
-                        print_success "Removed empty directory: $fish_config_dir"
-                    fi
-                fi
+    # Clean up empty directories if they exist and are empty
+    for dir in "$fish_completions_dir" "$fish_functions_dir" "$HOME/.config/fish"; do
+        if [[ -d "$dir" ]] && [[ -z "$(ls -A "$dir")" ]]; then
+            if confirm_action "Remove empty directory ($dir)?"; then
+                rmdir "$dir"
+                print_success "Removed empty directory: $dir"
             fi
         fi
-        
+    done
+    
+    return 0
+}
+
+# Uninstall Fish Fisher installation
+uninstall_fish_fisher() {
+    print_status "Uninstalling finder command from Fish shell (Fisher installation)..."
+    
+    if ! command -v fish >/dev/null 2>&1; then
+        print_warning "Fish shell not found"
+        return 0
+    fi
+    
+    if ! fish -c "fisher --version" >/dev/null 2>&1; then
+        print_warning "Fisher not found - cannot uninstall Fisher plugin automatically"
+        print_status "If you installed via Fisher, run: fisher remove iamrajjoshi/finder"
+        return 0
+    fi
+    
+    print_status "Use Fisher to uninstall:"
+    echo "  fisher remove iamrajjoshi/finder"
+    print_warning "Note: You need to run this command manually"
+    return 0
+}
+
+# Uninstall Zsh Oh My Zsh installation
+uninstall_zsh_ohmyzsh() {
+    print_status "Uninstalling finder command from Zsh (Oh My Zsh plugin)..."
+    
+    local zsh_custom="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+    local plugin_dir="$zsh_custom/plugins/finder"
+    
+    if [[ ! -d "$plugin_dir" ]]; then
+        print_warning "Oh My Zsh plugin directory not found: $plugin_dir"
+        return 0
+    fi
+    
+    if rm -rf "$plugin_dir"; then
+        print_success "Removed Oh My Zsh plugin directory: $plugin_dir"
+        print_status "Remember to remove 'finder' from your plugins list in ~/.zshrc"
+        print_status "Then reload your shell: source ~/.zshrc"
         return 0
     else
-        print_error "Failed to remove Fish function"
+        print_error "Failed to remove Oh My Zsh plugin directory"
         return 1
     fi
 }
 
-# Uninstall from Zsh shell
-uninstall_zsh() {
-    print_status "Uninstalling finder command from Zsh shell..."
+# Uninstall Zsh manual installation
+uninstall_zsh_manual() {
+    print_status "Uninstalling finder command from Zsh (manual installation)..."
     
     local zsh_config_file="$HOME/.zshrc"
     
@@ -116,8 +178,8 @@ uninstall_zsh() {
         return 0
     fi
     
-    # Check if finder.zsh is referenced
-    if ! grep -q "finder.zsh" "$zsh_config_file"; then
+    # Check if finder.plugin.zsh is referenced
+    if ! grep -q "finder.plugin.zsh" "$zsh_config_file"; then
         print_warning "Finder extension not found in: $zsh_config_file"
         return 0
     fi
@@ -135,10 +197,10 @@ uninstall_zsh() {
     local temp_file
     temp_file=$(mktemp)
     
-    # Remove lines containing finder.zsh and the comment line before it
+    # Remove lines containing finder.plugin.zsh and the comment line before it
     awk '
         /# Finder shell extension/ { skip_next = 1; next }
-        /finder\.zsh/ { if (skip_next) skip_next = 0; next }
+        /finder\.plugin\.zsh/ { if (skip_next) skip_next = 0; next }
         { skip_next = 0; print }
     ' "$zsh_config_file" > "$temp_file"
     
@@ -165,17 +227,19 @@ Usage: ./uninstall.sh [OPTIONS]
 Uninstall the finder shell extension from Fish and/or Zsh shells.
 
 Options:
-  --fish-only     Uninstall only from Fish shell
-  --zsh-only      Uninstall only from Zsh shell
-  --all           Uninstall from all shells (default)
+  --fish-manual   Uninstall Fish manual installation
+  --fish-fisher   Show instructions for Fisher uninstall
+  --zsh-ohmyzsh   Uninstall Oh My Zsh plugin
+  --zsh-manual    Uninstall Zsh manual installation
+  --all           Uninstall all detected installations (default)
   --force         Skip confirmation prompts
   -h, --help      Show this help message
 
 Examples:
-  ./uninstall.sh              # Uninstall from all detected shells
-  ./uninstall.sh --fish-only   # Uninstall only from Fish
-  ./uninstall.sh --zsh-only    # Uninstall only from Zsh
-  ./uninstall.sh --force       # Uninstall without confirmation prompts
+  ./uninstall.sh                # Uninstall all detected installations
+  ./uninstall.sh --fish-manual  # Uninstall only Fish manual installation
+  ./uninstall.sh --zsh-ohmyzsh  # Uninstall only Oh My Zsh plugin
+  ./uninstall.sh --force        # Uninstall without confirmation prompts
 
 The uninstaller will:
 - Detect current installations
@@ -187,21 +251,30 @@ EOF
 
 # Main uninstallation function
 main() {
-    local uninstall_fish=false
-    local uninstall_zsh=false
+    local uninstall_method=""
     local force_mode=false
     local target_all=true
     
     # Parse command line arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
-            --fish-only)
-                uninstall_fish=true
+            --fish-manual)
+                uninstall_method="fish-manual"
                 target_all=false
                 shift
                 ;;
-            --zsh-only)
-                uninstall_zsh=true
+            --fish-fisher)
+                uninstall_method="fish-fisher"
+                target_all=false
+                shift
+                ;;
+            --zsh-ohmyzsh)
+                uninstall_method="zsh-ohmyzsh"
+                target_all=false
+                shift
+                ;;
+            --zsh-manual)
+                uninstall_method="zsh-manual"
                 target_all=false
                 shift
                 ;;
@@ -228,25 +301,41 @@ main() {
     print_status "Starting Finder shell extension uninstallation..."
     
     # Check current installation status
-    local installation_status
-    installation_status=($(check_installation))
-    local fish_installed="${installation_status[0]}"
-    local zsh_installed="${installation_status[1]}"
+    local installations
+    installations=($(check_installation))
     
-    if [[ "$fish_installed" == false && "$zsh_installed" == false ]]; then
+    if [[ ${#installations[@]} -eq 0 ]]; then
         print_warning "Finder extension does not appear to be installed"
         exit 0
     fi
     
-    print_status "Current installation status:"
-    [[ "$fish_installed" == true ]] && print_status "  ✓ Fish shell: installed"
-    [[ "$zsh_installed" == true ]] && print_status "  ✓ Zsh shell: installed"
+    print_status "Current installations detected:"
+    for installation in "${installations[@]}"; do
+        case $installation in
+            fish-manual) print_status "  ✓ Fish shell: manual installation" ;;
+            zsh-ohmyzsh) print_status "  ✓ Zsh shell: Oh My Zsh plugin" ;;
+            zsh-manual) print_status "  ✓ Zsh shell: manual installation" ;;
+        esac
+    done
     echo ""
     
     # Determine what to uninstall
+    local methods_to_uninstall=()
     if [[ "$target_all" == true ]]; then
-        uninstall_fish="$fish_installed"
-        uninstall_zsh="$zsh_installed"
+        methods_to_uninstall=("${installations[@]}")
+    else
+        # Check if specified method is actually installed
+        for installation in "${installations[@]}"; do
+            if [[ "$installation" == "$uninstall_method" ]]; then
+                methods_to_uninstall=("$uninstall_method")
+                break
+            fi
+        done
+        
+        if [[ ${#methods_to_uninstall[@]} -eq 0 ]]; then
+            print_warning "Specified installation method '$uninstall_method' not found"
+            exit 0
+        fi
     fi
     
     # Confirmation prompt (unless force mode)
@@ -260,21 +349,32 @@ main() {
     
     # Perform uninstallation
     local success_count=0
-    local total_count=0
+    local total_count=${#methods_to_uninstall[@]}
     
-    if [[ "$uninstall_fish" == true ]]; then
-        total_count=$((total_count + 1))
-        if uninstall_fish; then
-            success_count=$((success_count + 1))
-        fi
-    fi
-    
-    if [[ "$uninstall_zsh" == true ]]; then
-        total_count=$((total_count + 1))
-        if uninstall_zsh; then
-            success_count=$((success_count + 1))
-        fi
-    fi
+    for method in "${methods_to_uninstall[@]}"; do
+        case $method in
+            fish-manual)
+                if uninstall_fish_manual; then
+                    success_count=$((success_count + 1))
+                fi
+                ;;
+            fish-fisher)
+                if uninstall_fish_fisher; then
+                    success_count=$((success_count + 1))
+                fi
+                ;;
+            zsh-ohmyzsh)
+                if uninstall_zsh_ohmyzsh; then
+                    success_count=$((success_count + 1))
+                fi
+                ;;
+            zsh-manual)
+                if uninstall_zsh_manual; then
+                    success_count=$((success_count + 1))
+                fi
+                ;;
+        esac
+    done
     
     # Uninstallation summary
     echo ""
@@ -282,7 +382,7 @@ main() {
     print_status "======================="
     
     if [[ $success_count -eq $total_count ]]; then
-        print_success "Successfully uninstalled from $success_count/$total_count shell(s)"
+        print_success "Successfully uninstalled $success_count/$total_count installation(s)"
         print_status "The finder command has been removed from your system"
     else
         print_error "Uninstallation completed with errors: $success_count/$total_count successful"
