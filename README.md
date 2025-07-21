@@ -110,11 +110,7 @@ finder "~/My Documents/Project Files"
 
 Fisher is the recommended package manager for Fish shell:
 
-1. **Install Fisher** (if not already installed):
-
-   ```bash
-   curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
-   ```
+1. **Install Fisher**
 
 2. **Install Finder**:
 
@@ -132,11 +128,7 @@ Fisher is the recommended package manager for Fish shell:
 
 Oh My Zsh is the recommended framework for Zsh:
 
-1. **Install Oh My Zsh** (if not already installed):
-
-   ```bash
-   sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-   ```
+1. **Install Oh My Zsh**:
 
 2. **Install Finder as a custom plugin**:
 
@@ -156,58 +148,24 @@ Oh My Zsh is the recommended framework for Zsh:
    source ~/.zshrc
    ```
 
-### Manual Installation
-
-If you prefer not to use package managers:
-
-**Fish Shell:**
-```bash
-# Clone and copy files manually
-git clone https://github.com/iamrajjoshi/finder.git
-mkdir -p ~/.config/fish/{functions,completions}
-cp finder/functions/finder.fish ~/.config/fish/functions/
-cp finder/completions/finder.fish ~/.config/fish/completions/
-```
-
-**Zsh Shell:**
-```bash
-# Clone and source manually
-git clone https://github.com/iamrajjoshi/finder.git
-echo 'source /path/to/finder/plugins/finder/finder.plugin.zsh' >> ~/.zshrc
-source ~/.zshrc
-```
-
 ## 🗑️ Uninstallation
 
 ### Using Package Managers
 
 #### Fisher (Fish)
+
 ```bash
 fisher remove iamrajjoshi/finder
 ```
 
 #### Oh My Zsh (Zsh)
+
 ```bash
 # Remove plugin directory
 rm -rf ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/finder
 
 # Remove 'finder' from plugins list in ~/.zshrc
 # Then reload: source ~/.zshrc
-```
-
-### Manual Uninstallation
-
-#### Fish Shell
-```bash
-# Remove function and completion files
-rm ~/.config/fish/functions/finder.fish
-rm ~/.config/fish/completions/finder.fish
-```
-
-#### Zsh Shell
-```bash
-# Remove source line from ~/.zshrc and reload
-# Then remove the cloned repository
 ```
 
 ## 🛠️ Requirements
@@ -245,28 +203,6 @@ Both Fish and Zsh versions include built-in tab completion:
 - **Fish**: Completes directories and shows descriptions
 - **Zsh**: Completes files and directories with Zsh's powerful completion system
 
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Command not found**
-```bash
-# For Fish: ensure function is in the right location
-ls ~/.config/fish/functions/finder.fish
-
-# For Zsh: ensure sourcing is in .zshrc
-grep finder ~/.zshrc
-```
-
-**Permission denied**
-```bash
-# Make sure you have permission to access the path
-ls -la /path/to/directory
-```
-
-**Not working on non-macOS**
-- This extension only works on macOS and will show an error on other systems
-
 ### Debug Mode
 
 For troubleshooting, you can manually inspect the shell functions:
@@ -279,51 +215,6 @@ functions finder
 which finder
 ```
 
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-### Quick Development Setup
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes
-4. Test with both Fish and Zsh (if available)
-5. Submit a pull request
-
-### Testing
-
-Test the installation and functionality:
-
-```bash
-# Test installation
-./install.sh --auto
-
-# Test basic functionality
-finder --help
-finder --version
-finder .
-
-# Test uninstallation
-./uninstall.sh --force
-```
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Inspired by the need for simple Finder integration in terminal workflows
-- Built with love for the macOS and shell scripting community
-- Thanks to all contributors and users who help improve this tool
-
-## 📞 Support
-
-- 🐛 **Bug Reports**: [Open an issue](https://github.com/yourusername/finder/issues)
-- 💡 **Feature Requests**: [Open an issue](https://github.com/yourusername/finder/issues)
-- ❓ **Questions**: [Start a discussion](https://github.com/yourusername/finder/discussions)
-
----
-
-**Made with ❤️ for macOS terminal users**
